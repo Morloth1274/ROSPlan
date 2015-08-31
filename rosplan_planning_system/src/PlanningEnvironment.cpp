@@ -221,7 +221,9 @@ namespace KCL_rosplan {
 				for(size_t j=0;j<domainAttrSrv.response.attributes.size();j++) {
 					rosplan_knowledge_msgs::KnowledgeItem attr = domainAttrSrv.response.attributes[j];
 					if(attr.knowledge_type == rosplan_knowledge_msgs::KnowledgeItem::FACT && attr.attribute_name.compare(ait->first)==0)
+					{
 						domain_attributes.push_back(attr);
+					}
 				}
 			} else {
 				ROS_ERROR("KCL: (PS) Failed to call service /kcl_rosplan/get_domain_attributes %s", domainAttrSrv.request.predicate_name.c_str());
@@ -246,8 +248,10 @@ namespace KCL_rosplan {
 		if (GetCurrentGoalsClient.call(currentGoalSrv)) {
 			for(size_t j=0;j<currentGoalSrv.response.attributes.size();j++) {
 				rosplan_knowledge_msgs::KnowledgeItem attr = currentGoalSrv.response.attributes[j];
-				if(attr.knowledge_type == rosplan_knowledge_msgs::KnowledgeItem::FACT)
+				if(attr.knowledge_type == rosplan_knowledge_msgs::KnowledgeItem::FACT ||
+				   attr.knowledge_type == rosplan_knowledge_msgs::KnowledgeItem::FUNCTION)
 					goal_attributes.push_back(attr);
+					
 			}
 		} else {
 			ROS_ERROR("KCL: (PS) Failed to call service /kcl_rosplan/get_current_goals");

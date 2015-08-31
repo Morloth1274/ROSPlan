@@ -15,3 +15,12 @@ diagnostic_msgs/KeyValue[] values
 
 # function value
 float64 function_value
+
+# function operator (only for goals)
+uint8 EQUAL = 0
+uint8 LESS = 1
+uint8 LESS_OR_EQUAL = 2
+uint8 GREATER = 3
+uint8 GREATER_OR_EQUAL = 4
+
+uint8 function_operator

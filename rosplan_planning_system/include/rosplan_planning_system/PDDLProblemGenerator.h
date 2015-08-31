@@ -17,6 +17,7 @@ namespace KCL_rosplan {
 		void makeHeader(PlanningEnvironment environment, std::ofstream &pFile);
 		void makeInitialState(PlanningEnvironment environment, std::ofstream &pFile);
 		void makeGoals(PlanningEnvironment environment, std::ofstream &pFile);
+		void makeMakespan(PlanningEnvironment environment, std::ofstream &pFile);
 
 	public:
 

@@ -1,0 +1,17 @@
+(define (domain recon)
+  (:requirements :typing :durative-actions :fluents :timed-initial-literals :equality :conditional-effects) 
+  (:types waypoint hypothesis)
+  (:predicates (at ?p - waypoint) (notvisited ?p - waypoint))
+  (:functions (reward) (rewardof ?w - waypoint) (distance ?p1 ?p2 - waypoint) (mf ?w1 ?w2 - waypoint) )
+
+(:durative-action doLeg
+:parameters (?from ?to - waypoint)
+:duration (= ?duration (distance ?from ?to))
+;;:condition (and (at start (at ?from)) (over all (not (= ?from ?to))) (at start (notVisited ?to)))
+:condition (and (at start (at ?from)) (at start (notVisited ?to)))
+:effect (and (at end (at ?to)) (at start (not (at ?from))) (at start (not (notVisited ?to)))
+(at end (increase (reward) (rewardof ?to)))
+(forall (?w - waypoint) (at end (assign (rewardof ?w) (* (rewardof ?w) (mf ?to ?w)))))
+)
+)
+)

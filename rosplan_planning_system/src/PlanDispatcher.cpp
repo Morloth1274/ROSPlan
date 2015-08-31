@@ -123,14 +123,17 @@ namespace KCL_rosplan {
 
 		std::map<std::string, std::vector<std::vector<std::string> > >::iterator oit;
 		oit = environment.domain_operator_precondition_map.find(msg.name);
-		if(oit==environment.domain_operator_precondition_map.end()) return false;
+		if(oit==environment.domain_operator_precondition_map.end()) 
+		{
+			return false;
+		}
 
 		// iterate through conditions
 		std::vector<std::vector<std::string> >::iterator cit = oit->second.begin();
 		for(; cit!=oit->second.end(); cit++) {
 			
 			rosplan_knowledge_msgs::KnowledgeItem condition;
-			
+
 			// set fact or function
 			std::map<std::string,std::vector<std::string> >::iterator dit = environment.domain_predicates.find((*cit)[0]);
 			if(dit!=environment.domain_predicates.end()) condition.knowledge_type = rosplan_knowledge_msgs::KnowledgeItem::FACT;

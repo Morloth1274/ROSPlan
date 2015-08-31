@@ -65,6 +65,11 @@ namespace KCL_rosplan {
 			removeKnowledge(req.knowledge);
 		else if(req.update_type == rosplan_knowledge_msgs::KnowledgeUpdateService::Request::REMOVE_GOAL)
 			removeMissionGoal(req.knowledge);
+		else
+		{
+			res.success = false;
+			return false;
+		}
 
 		res.success = true;
 		return true;
@@ -223,8 +228,10 @@ namespace KCL_rosplan {
 
 		std::vector<rosplan_knowledge_msgs::KnowledgeItem>::iterator pit;
 		for(pit=model_goals.begin(); pit!=model_goals.end(); pit++) {
-			if(KnowledgeComparitor::containsKnowledge(msg, *pit))
+			if(KnowledgeComparitor::containsKnowledge(msg, *pit)) {
+				ROS_INFO("KCL: (KB) NOT Adding mission goal (%s)", msg.attribute_name.c_str());
 				return;
+			}
 		}
 		ROS_INFO("KCL: (KB) Adding mission goal (%s)", msg.attribute_name.c_str());
 		model_goals.push_back(msg);
@@ -260,13 +267,17 @@ namespace KCL_rosplan {
 		// fetch the knowledgeItems of the correct attribute
 		for(size_t i=0; i<model_facts.size(); i++) {
 			if(0==req.predicate_name.compare(model_facts[i].attribute_name) || ""==req.predicate_name)
+			{
 				res.attributes.push_back(model_facts[i]);
+			}
 		}
 
 		// ...or fetch the knowledgeItems of the correct function
 		for(size_t i=0; i<model_functions.size(); i++) {
 			if(0==req.predicate_name.compare(model_functions[i].attribute_name) || ""==req.predicate_name)
+			{
 				res.attributes.push_back(model_functions[i]);
+			}
 		}
 
 		return true;

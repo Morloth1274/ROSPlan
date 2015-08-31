@@ -20,6 +20,7 @@ namespace KCL_rosplan {
 		makeHeader(environment, pFile);
 		makeInitialState(environment, pFile);
 		makeGoals(environment, pFile);
+		makeMakespan(environment, pFile);
 	}
 
 	/*--------*/
@@ -68,9 +69,13 @@ namespace KCL_rosplan {
 			std::map<std::string,std::vector<std::string> >::iterator ait;
 			ait = environment.domain_predicates.find(environment.domain_attributes[i].attribute_name);
 			if(ait == environment.domain_predicates.end())
+			{
 				ait = environment.domain_functions.find(environment.domain_attributes[i].attribute_name);
+			}
 			if(ait == environment.domain_functions.end())
+			{
 				continue;
+			}
 
 			// find the PDDL parameters in the KnowledgeItem
 			bool writeAttribute = true;
@@ -138,32 +143,87 @@ namespace KCL_rosplan {
 
 			std::stringstream ss;
 			bool writeAttribute = true;
+
+			std::vector<std::string> parameters;
+			if(environment.goal_attributes[i].knowledge_type == rosplan_knowledge_msgs::KnowledgeItem::FUNCTION)
+			{
+				std::map<std::string,std::vector<std::string> >::iterator fit = environment.domain_functions.find(environment.goal_attributes[i].attribute_name);
+				if (fit == environment.domain_functions.end())
+					writeAttribute = false;
+				else
+					parameters = (*fit).second;
+			}
+			else
+			{
+				// check if attribute belongs in the PDDL model
+				std::map<std::string,std::vector<std::string> >::iterator ait = environment.domain_predicates.find(environment.goal_attributes[i].attribute_name);
+				if(ait == environment.domain_predicates.end())
+					writeAttribute = false;
+				else
+					parameters = (*ait).second;
+			}
 			
-			// check if attribute belongs in the PDDL model
-			std::map<std::string,std::vector<std::string> >::iterator ait;
-			ait = environment.domain_predicates.find(environment.goal_attributes[i].attribute_name);
-			if(ait != environment.domain_predicates.end()) {
+			if (writeAttribute)
+			{
+				if(environment.goal_attributes[i].knowledge_type == rosplan_knowledge_msgs::KnowledgeItem::FUNCTION)
+				{
+					if(environment.goal_attributes[i].function_operator == rosplan_knowledge_msgs::KnowledgeItem::EQUAL)
+					{
+						ss << "(= ";
+					}
+					else if(environment.goal_attributes[i].function_operator == rosplan_knowledge_msgs::KnowledgeItem::LESS)
+					{
+						ss << "(< ";
+					}
+					else if(environment.goal_attributes[i].function_operator == rosplan_knowledge_msgs::KnowledgeItem::LESS_OR_EQUAL)
+					{
+						ss << "(<= ";
+					}
+					else if(environment.goal_attributes[i].function_operator == rosplan_knowledge_msgs::KnowledgeItem::GREATER)
+					{
+						ss << "(> ";
+					}
+					else if(environment.goal_attributes[i].function_operator == rosplan_knowledge_msgs::KnowledgeItem::GREATER_OR_EQUAL)
+					{
+						ss << "(>= ";
+					}
+					else
+					{
+						writeAttribute = false;	
+					}
+				}
 
 				ss << "    (" + environment.goal_attributes[i].attribute_name;
 
 				// find the PDDL parameters in the KnowledgeItem
-				bool found = false;
-				for(size_t j=0; j<ait->second.size(); j++) {
-				for(size_t k=0; k<environment.goal_attributes[i].values.size(); k++) {
-					if(0 == environment.goal_attributes[i].values[k].key.compare(ait->second[j])) {
-						ss << " " << environment.goal_attributes[i].values[k].value;
-						found = true;
+				for(size_t j=0; j<parameters.size(); j++) {
+					bool found = true;
+					for(size_t k=0; k<environment.goal_attributes[i].values.size(); k++) {
+						if(0 == environment.goal_attributes[i].values[k].key.compare(parameters[j])) {
+							ss << " " << environment.goal_attributes[i].values[k].value;
+							found = true;
+							break;
+						}
 					}
-				}};
-				if(!found) writeAttribute = false;
+					if(!found) writeAttribute = false;
+				};
 
 				ss << ")";
+				if(environment.goal_attributes[i].knowledge_type == rosplan_knowledge_msgs::KnowledgeItem::FUNCTION)
+					ss << environment.goal_attributes[i].function_value << " )";
 
 			} else
 				writeAttribute = false;
 
 			if(writeAttribute) pFile << ss.str() << std::endl;
 		}
-		pFile << ")))" << std::endl;
+		pFile << "))" << std::endl;
 	}
+
+	void PDDLProblemGenerator::makeMakespan(PlanningEnvironment environment, std::ofstream &pFile)
+	{
+		pFile << "(:metric maximize (reward))" << std::endl;
+		pFile << ")" << std::endl;
+	}
+
 } // close namespace

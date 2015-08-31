@@ -42,11 +42,8 @@ namespace KCL_rosplan {
 
 			getline(planfile, line);
 
-			if (line.substr(0,6).compare("; Plan") == 0) {
-				expectedPlanDuration = atof(line.substr(25).c_str());
-			} else if (line.substr(0,6).compare("; Time")!=0) {
+			if (line.substr(0,6) == "; Time") {
 				//consume useless lines
-			} else {
 
 				potentialPlan.clear();
 				size_t planFreeActionID = freeActionID;
@@ -56,6 +53,10 @@ namespace KCL_rosplan {
 
 					getline(planfile, line);
 					if (line.length()<2)
+						break;
+
+					// Check that the beginning of the line has some numbers.
+					if (!isdigit(line[0]))
 						break;
 
 					rosplan_dispatch_msgs::ActionDispatch msg;
@@ -118,7 +119,7 @@ namespace KCL_rosplan {
 					planDuration = msg.duration + atof(line.substr(0,curr).c_str());
 				}
 
-				if(planDuration - expectedPlanDuration < 0.01)  {
+//				if(planDuration - expectedPlanDuration < 0.01)  {
 
 					// trim any previously read plan
 					while(action_list.size() > freeActionID) {
@@ -133,9 +134,9 @@ namespace KCL_rosplan {
 
 					total_plan_duration = planDuration;
 
-				} else {
+//				} else {
 					ROS_INFO("Duration: %f, expected %f; plan discarded", planDuration, expectedPlanDuration);
-				}
+//				}
 			}
 		}
 		planfile.close();
