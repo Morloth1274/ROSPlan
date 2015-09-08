@@ -22,7 +22,7 @@
         <param name="problem_path" value="$(find rosplan_planning_system)/common/problem.pddl" />
         <!-- to run the planner -->
 <!--        <param name="planner_command" value="timeout 10 $(find rosplan_planning_system)/common/bin/popf -n" /> -->
-        <param name="planner_command" value="timeout 10 $(find rosplan_interface_minesweeper)/common/bin/popf3-clp-last -n" />
+        <param name="planner_command" value="timeout 120 $(find rosplan_interface_minesweeper)/common/bin/popf3-clp-last -n" />
     </node>
 </launch>
 
